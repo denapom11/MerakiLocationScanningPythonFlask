@@ -1,7 +1,7 @@
 #!flask/bin/python
 
 """
-Cisco Meraki CMX Receiver
+Cisco Meraki Location Scanning Receiver
 
 A simple example demonstrating how to interact with the CMX API.
 
@@ -33,15 +33,23 @@ from pprint import pprint
 from flask import Flask
 from flask import json
 from flask import request
+from flask import render_template
 import sys, getopt
-from pymongo import MongoClient
+import json
+#from pymongo import MongoClient
+#from bson.json_util import dumps
 
 ############## USER DEFINED SETTINGS ###############
 # MERAKI SETTINGS
 validator = "EnterYourValidator"
 secret = "EnterYourSecret"
 version = "2.0" # This code was written to support the CMX JSON version specified
+cmxdata = 'Location Data Holder'
 
+#client = MongoClient("mongodb://localhost:27017")
+#db = client.cmxdata
+
+'''
 # Save CMX Data
 def save_data(data):
     print("---- SAVING CMX DATA ----")
@@ -72,11 +80,9 @@ def save_data(data):
 
 
     # Commit to database
-    client = MongoClient("mongodb://localhost:27017")
-    db = client.test
     result = db.cmxdata.insert_one(data)
     print("MongoDB insert result: ",result )
-
+'''
 ####################################################
 app = Flask(__name__)
 
@@ -90,10 +96,11 @@ def get_validator():
 # Accept CMX JSON POST
 @app.route('/', methods=['POST'])
 def get_cmxJSON():
+    global cmxdata
     if not request.json or not 'data' in request.json:
         return("invalid data",400)
     cmxdata = request.json
-    #pprint(cmxdata, indent=1)
+    pprint(cmxdata, indent=1)
     print("Received POST from ",request.environ['REMOTE_ADDR'])
 
     # Verify secret
@@ -119,20 +126,41 @@ def get_cmxJSON():
         print("Unknown Device 'type'")
         return("invalid device type",403)
 
-    # Do something with data (commit to database)
-    save_data(cmxdata)
-
     # Return success message
     return "CMX POST Received"
 
+@app.route('/go', methods=['GET'])
+def get_go():
+    return render_template('index.html',**locals())
 
 
+@app.route('/clients/', methods=['GET'])
+def get_clients():
+    global cmxdata
+    pprint(cmxdata["data"]["observations"], indent=1)
+    return json.dumps(cmxdata["data"]["observations"])
+    '''
+    db.cmxdata.drop()
+    print("prep to query data")
+    result = db.cmxdata.find()
+    print("MongoDB get result: ",result )
+    '''
+
+
+@app.route('/clients/<clientMac>', methods=['GET'])
+def get_individualclients(clientMac):
+    global cmxdata
+    for client in cmxdata["data"]["observations"]:
+        if client["clientMac"] == clientMac:
+            return json.dumps(client)
+    return ''
 
 # Launch application with supplied arguments
 
 def main(argv):
     global validator
     global secret
+
 
     try:
        opts, args = getopt.getopt(argv,"hv:s:",["validator=","secret="])

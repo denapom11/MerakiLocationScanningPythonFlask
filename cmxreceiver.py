@@ -37,8 +37,8 @@ import sys, getopt
 
 ############## USER DEFINED SETTINGS ###############
 # MERAKI SETTINGS
-validator = "EnterYourValidator"
-secret = "EnterYourSecret"
+validator = "9954e8cc03bbd5063df927a1e76925e09a40c032"
+secret = "housetracking"
 version = "2.0" # This code was written to support the CMX JSON version specified
 
 # Save CMX Data
