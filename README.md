@@ -14,9 +14,9 @@ http://flask.pocoo.org/docs/0.12/
 
 
 ## locationscanningreceiver.py
--- The basic app will show the "blue-dot" location of the clients on a map
--- To launch from python directly: `python3 locationscanningreceiver.py -v <validator> -s <secret>`
--- To launch via flask:
+* The basic app will show the "blue-dot" location of the clients on a map
+* To launch from python directly: `python3 locationscanningreceiver.py -v <validator> -s <secret>`
+* To launch via flask:
 ```
 export FLASK_APP=locationscanningreceiver.py -v <validator> -s <secret>
 flask run -h 0.0.0.0
@@ -24,17 +24,17 @@ flask run -h 0.0.0.0
 ```
 
 ## locationscanningreceiver-mongodb.py
--- Extends the basic app by placing data into a local MongoDB database to save historical data.
--- Requires https://www.mongodb.com/
--- Requires pymongo (`pip install pymongo`)
--- To launch from python directly:
-    -- `mkdir mongodata`
-    -- `mongod --dbpath=./mongodata --nojournal`
-    -- from another terminal or command line window: `python3 locationscanningreceiver-mongodb.py -v <validator> -s <secret>`
--- To launch via flask:
-    -- `mkdir mongodata`
-    -- `mongod --dbpath=./mongodata --nojournal`
-    -- from another terminal or command line window:
+* Extends the basic app by placing data into a local MongoDB database to save historical data.
+* Requires https://www.mongodb.com/
+* Requires pymongo (`pip install pymongo`)
+* To launch from python directly:
+    - `mkdir mongodata`
+    - `mongod --dbpath=./mongodata --nojournal`
+    - from another terminal or command line window: `python3 locationscanningreceiver-mongodb.py -v <validator> -s <secret>`
+* To launch via flask:
+    - `mkdir mongodata`
+    - `mongod --dbpath=./mongodata --nojournal`
+    - from another terminal or command line window:
     ```
     export FLASK_APP=locationscanningreceiver-mongodb.py -v <validator> -s <secret>
     flask run -h 0.0.0.0
