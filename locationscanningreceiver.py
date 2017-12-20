@@ -25,7 +25,6 @@ Written by Cory Guynn
 2016
 
 www.InternetOfLEGO.com
-Developers.Meraki.com
 """
 
 # Libraries
@@ -36,53 +35,13 @@ from flask import request
 from flask import render_template
 import sys, getopt
 import json
-#from pymongo import MongoClient
-#from bson.json_util import dumps
 
 ############## USER DEFINED SETTINGS ###############
 # MERAKI SETTINGS
 validator = "EnterYourValidator"
 secret = "EnterYourSecret"
 version = "2.0" # This code was written to support the CMX JSON version specified
-cmxdata = 'Location Data Holder'
-
-#client = MongoClient("mongodb://localhost:27017")
-#db = client.cmxdata
-
-'''
-# Save CMX Data
-def save_data(data):
-    print("---- SAVING CMX DATA ----")
-    # CHANGE ME - send 'data' to a database or storage system
-    pprint(data, indent=1)
-
-    ## Adjust data before DB insert ##
-    # Add GeoJSON structure for MongoDB Compass (or similar) mapping
-    for i in data["data"]["observations"]:
-        print("i",i)
-        data["data"]["secret"] = "hidden"
-        lat = i["location"]["lat"]
-        lng = i["location"]["lng"]
-        clientMac = i["clientMac"]
-        data["data"]["geoJSON"] = {
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [lat,lng]
-          },
-          "properties": {
-            "name": clientMac
-          }
-        }
-
-        #data["data"]["locationGeoJSON"] = json.dumps(locationGeoJSON)
-        #data["data"].append({"geoJSON":{"type": "Feature","geometry": {"type": "Point","coordinates": [i["location"]["lat"], i[["location"]["lng"], i["location"]["unc"]]},"properties": {"name": i["clientMac"]}}})
-
-
-    # Commit to database
-    result = db.cmxdata.insert_one(data)
-    print("MongoDB insert result: ",result )
-'''
+locationdata = 'Location Data Holder'
 ####################################################
 app = Flask(__name__)
 
@@ -95,39 +54,39 @@ def get_validator():
 
 # Accept CMX JSON POST
 @app.route('/', methods=['POST'])
-def get_cmxJSON():
-    global cmxdata
+def get_locationJSON():
+    global locationdata
     if not request.json or not 'data' in request.json:
         return("invalid data",400)
-    cmxdata = request.json
-    pprint(cmxdata, indent=1)
+    locationdata = request.json
+    pprint(locationdata, indent=1)
     print("Received POST from ",request.environ['REMOTE_ADDR'])
 
     # Verify secret
-    if cmxdata['secret'] != secret:
-        print("secret invalid:", cmxdata['secret'])
+    if locationdata['secret'] != secret:
+        print("secret invalid:", locationdata['secret'])
         return("invalid secret",403)
     else:
-        print("secret verified: ", cmxdata['secret'])
+        print("secret verified: ", locationdata['secret'])
 
     # Verify version
-    if cmxdata['version'] != version:
+    if locationdata['version'] != version:
         print("invalid version")
         return("invalid version",400)
     else:
-        print("version verified: ", cmxdata['version'])
+        print("version verified: ", locationdata['version'])
 
     # Determine device type
-    if cmxdata['type'] == "DevicesSeen":
+    if locationdata['type'] == "DevicesSeen":
         print("WiFi Devices Seen")
-    elif cmxdata['type'] == "BluetoothDevicesSeen":
+    elif locationdata['type'] == "BluetoothDevicesSeen":
         print("Bluetooth Devices Seen")
     else:
         print("Unknown Device 'type'")
         return("invalid device type",403)
 
     # Return success message
-    return "CMX POST Received"
+    return "Location Scanning POST Received"
 
 @app.route('/go', methods=['GET'])
 def get_go():
@@ -136,21 +95,15 @@ def get_go():
 
 @app.route('/clients/', methods=['GET'])
 def get_clients():
-    global cmxdata
-    pprint(cmxdata["data"]["observations"], indent=1)
-    return json.dumps(cmxdata["data"]["observations"])
-    '''
-    db.cmxdata.drop()
-    print("prep to query data")
-    result = db.cmxdata.find()
-    print("MongoDB get result: ",result )
-    '''
+    global locationdata
+    pprint(locationdata["data"]["observations"], indent=1)
+    return json.dumps(locationdata["data"]["observations"])
 
 
 @app.route('/clients/<clientMac>', methods=['GET'])
 def get_individualclients(clientMac):
-    global cmxdata
-    for client in cmxdata["data"]["observations"]:
+    global locationdata
+    for client in locationdata["data"]["observations"]:
         if client["clientMac"] == clientMac:
             return json.dumps(client)
     return ''
@@ -165,11 +118,11 @@ def main(argv):
     try:
        opts, args = getopt.getopt(argv,"hv:s:",["validator=","secret="])
     except getopt.GetoptError:
-       print ('cmxreceiver.py -v <validator> -s <secret>')
+       print ('locationscanningreceiver.py -v <validator> -s <secret>')
        sys.exit(2)
     for opt, arg in opts:
        if opt == '-h':
-           print ('cmxreceiver.py -v <validator> -s <secret>')
+           print ('locationscanningreceiver.py -v <validator> -s <secret>')
            sys.exit()
        elif opt in ("-v", "--validator"):
            validator = arg
